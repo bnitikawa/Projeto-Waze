@@ -1,0 +1,726 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Projeto Waze — SouzaOkawa</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=Montserrat:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --red:#D2232A;
+  --red-dark:#a01a20;
+  --gray-dark:#76777B;
+  --gray-mid:#B1B1B1;
+  --gray-light:#e8e8e8;
+  --white:#FFFFFF;
+  --off-white:#F7F6F4;
+  --black:#1a1a1a;
+  --font-display:'Cormorant Garamond',Georgia,serif;
+  --font-body:'Montserrat',system-ui,sans-serif;
+}
+html{scroll-behavior:smooth;overflow-x:hidden}
+body{background:var(--white);color:var(--black);font-family:var(--font-body);overflow-x:hidden}
+
+/* ── SECTIONS ── */
+section{min-height:100vh;width:100%;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;padding:4rem 6rem}
+
+/* ── 01 HERO ── */
+#hero{background:var(--black);flex-direction:column;justify-content:center;align-items:flex-start;padding:0;min-height:100vh}
+.hero-inner{width:100%;height:100vh;position:relative;display:flex;flex-direction:column;justify-content:center;overflow:hidden}
+
+/* Brand graphic elements — adapted for dark background */
+.hero-bg-box-lg{position:absolute;width:340px;height:340px;background:rgba(210,35,42,0.06);border-radius:0 0 0 80px;top:-40px;right:-40px}
+.hero-bg-box-sm{position:absolute;width:80px;height:80px;background:rgba(210,35,42,0.08);border-radius:0 0 0 20px;bottom:200px;right:200px}
+.hero-gray-band{position:absolute;top:0;right:0;width:45%;height:100%;background:rgba(255,255,255,0.02);clip-path:polygon(15% 0,100% 0,100% 100%,0 100%)}
+
+/* SO animation canvas */
+.so-canvas{position:absolute;right:4%;top:50%;transform:translateY(-50%);width:380px;height:420px;z-index:2}
+.so-canvas svg{width:100%;height:100%}
+
+.hero-content{position:relative;z-index:3;padding:0 6rem;max-width:600px}
+.eyebrow{font-family:var(--font-body);font-size:10px;font-weight:600;letter-spacing:0.25em;text-transform:uppercase;color:var(--gray-mid);margin-bottom:2.5rem}
+.hero-title{font-family:'Cormorant Garamond',Georgia,serif;font-size:clamp(4.5rem,8vw,8rem);font-weight:300;line-height:1.0;color:var(--white);margin-bottom:0.5rem}
+.hero-title em{font-style:italic;color:var(--red)}
+.hero-recalc{font-family:'Cormorant Garamond',Georgia,serif;font-size:clamp(1.5rem,2.5vw,2.5rem);font-weight:300;font-style:italic;color:var(--gray-mid);margin-bottom:2rem;letter-spacing:0.02em}
+.hero-divider{width:48px;height:2px;background:var(--red);margin:2rem 0}
+.hero-sub{font-family:var(--font-body);font-size:12px;font-weight:300;color:rgba(255,255,255,0.45);letter-spacing:0.06em;line-height:1.9;max-width:380px}
+.hero-tag{display:inline-flex;align-items:center;gap:10px;font-size:9px;font-weight:600;letter-spacing:0.2em;text-transform:uppercase;color:var(--white);background:var(--red);padding:10px 18px;margin-top:2.5rem;border-radius:0 0 0 12px}
+
+/* corner box resource */
+.corner-box{position:absolute;background:var(--red);border-radius:0 0 0 14px}
+
+/* ── 02 DORES ── */
+#dores{background:var(--off-white);flex-direction:column;align-items:flex-start;padding:6rem}
+.section-label{font-size:9px;font-weight:600;letter-spacing:0.3em;text-transform:uppercase;color:var(--red);margin-bottom:3rem;display:flex;align-items:center;gap:12px}
+.section-label::after{content:'';display:block;width:40px;height:1px;background:var(--red)}
+.dores-title{font-family:var(--font-display);font-size:clamp(2.2rem,4vw,4rem);font-weight:300;line-height:1.1;color:var(--black);margin-bottom:4rem;max-width:700px}
+.dores-title em{font-style:italic;color:var(--red)}
+.dores-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:2px;width:100%}
+.dor-card{background:var(--white);padding:2.5rem 2rem;position:relative;overflow:hidden;opacity:0;transform:translateY(30px);transition:opacity 0.6s ease,transform 0.6s ease}
+.dor-card.visible{opacity:1;transform:translateY(0)}
+.dor-card::before{content:'';position:absolute;top:0;left:0;width:3px;height:0;background:var(--red);transition:height 0.5s ease 0.3s}
+.dor-card.visible::before{height:100%}
+.dor-num{font-family:var(--font-display);font-size:5rem;font-weight:300;color:var(--gray-light);line-height:1;margin-bottom:1rem;display:block}
+.dor-title{font-size:12px;font-weight:600;letter-spacing:0.12em;text-transform:uppercase;color:var(--black);margin-bottom:1rem}
+.dor-desc{font-size:13px;font-weight:300;color:var(--gray-dark);line-height:1.8}
+.dor-quote{font-family:var(--font-display);font-size:1rem;font-style:italic;color:var(--red);margin-top:1.5rem;line-height:1.6}
+
+/* ── 03 CIRCULO ── */
+#circulo{background:var(--black);flex-direction:column;padding:5rem}
+.circulo-header{text-align:center;margin-bottom:4rem}
+.circulo-header .section-label{justify-content:center;color:var(--gray-mid)}
+.circulo-header .section-label::after{background:var(--gray-mid)}
+.circulo-title{font-family:var(--font-display);font-size:clamp(2rem,3.5vw,3.5rem);font-weight:300;color:var(--white);line-height:1.15}
+.circulo-title em{font-style:italic;color:var(--red)}
+.orbit-container{position:relative;width:480px;height:480px;margin:0 auto}
+.orbit-ring{position:absolute;inset:0;border:1px solid rgba(255,255,255,0.08);border-radius:50%}
+.orbit-inner{position:absolute;inset:60px;border:1px solid rgba(210,35,42,0.3);border-radius:50%;opacity:0;transition:opacity 1s ease}
+.orbit-inner.visible{opacity:1}
+.orbit-center{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:100px;height:100px;background:var(--red);border-radius:0 0 0 28px;display:flex;flex-direction:column;align-items:center;justify-content:center;opacity:0;transition:opacity 0.8s ease,transform 0.8s ease;transform:translate(-50%,-50%) scale(0.5)}
+.orbit-center.visible{opacity:1;transform:translate(-50%,-50%) scale(1)}
+.orbit-center-text{font-size:8px;font-weight:600;letter-spacing:0.15em;text-transform:uppercase;color:var(--white);text-align:center;line-height:1.6}
+.area-node{position:absolute;width:72px;height:72px;display:flex;flex-direction:column;align-items:center;justify-content:center;opacity:0;transform:scale(0.5);transition:opacity 0.5s ease,transform 0.5s ease;cursor:default}
+.area-node.visible{opacity:1;transform:scale(1)}
+.area-dot{width:36px;height:36px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.2);border-radius:50%;display:flex;align-items:center;justify-content:center;margin-bottom:6px;font-size:9px;font-weight:600;color:var(--white);letter-spacing:0.05em}
+.area-label{font-size:8px;font-weight:500;color:var(--gray-mid);letter-spacing:0.1em;text-transform:uppercase;text-align:center;line-height:1.4}
+.inovacao-ring{position:absolute;inset:30px;border:2px solid var(--red);border-radius:50%;opacity:0;transition:opacity 1.2s ease;box-shadow:0 0 40px rgba(210,35,42,0.15)}
+.inovacao-ring.visible{opacity:1}
+
+/* ── 04 SEE ── */
+#see{background:var(--white);flex-direction:column;padding:0}
+.see-wrapper{width:100%;min-height:100vh}
+.see-intro{min-height:100vh;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;padding:5rem}
+.see-word{font-family:var(--font-display);font-size:clamp(5rem,12vw,11rem);font-weight:300;line-height:0.9;letter-spacing:-0.02em;color:var(--black);opacity:0;transform:translateY(40px);transition:opacity 0.8s ease,transform 0.8s ease}
+.see-word.visible{opacity:1;transform:translateY(0)}
+.see-word span{color:var(--red)}
+.see-subtitle{font-size:11px;font-weight:600;letter-spacing:0.3em;text-transform:uppercase;color:var(--gray-dark);margin-top:2rem;opacity:0;transition:opacity 0.8s ease 0.6s}
+.see-subtitle.visible{opacity:1}
+
+.see-frentes{width:100%}
+.frente-block{min-height:100vh;display:grid;grid-template-columns:1fr 1fr;position:relative;overflow:hidden}
+.frente-block:nth-child(even) .frente-content{order:2}
+.frente-block:nth-child(even) .frente-visual{order:1}
+.frente-content{display:flex;flex-direction:column;justify-content:center;padding:6rem 5rem;position:relative;z-index:2}
+.frente-letter{font-family:var(--font-display);font-size:clamp(8rem,15vw,14rem);font-weight:300;line-height:0.85;color:var(--gray-light);position:absolute;top:3rem;left:3rem;opacity:0;transform:translateX(-20px);transition:opacity 0.8s ease,transform 0.8s ease}
+.frente-block.visible .frente-letter{opacity:1;transform:translateX(0)}
+.frente-word{font-size:10px;font-weight:600;letter-spacing:0.25em;text-transform:uppercase;color:var(--red);margin-bottom:1.5rem;margin-top:6rem;position:relative;z-index:1}
+.frente-name{font-family:var(--font-display);font-size:clamp(2rem,3.5vw,3.2rem);font-weight:400;color:var(--black);line-height:1.1;margin-bottom:1.5rem;position:relative;z-index:1}
+.frente-phrase{font-size:14px;font-weight:300;color:var(--gray-dark);line-height:1.9;max-width:400px;position:relative;z-index:1}
+.frente-phrase strong{color:var(--black);font-weight:500}
+.frente-tag{display:inline-flex;align-items:center;gap:8px;margin-top:2rem;font-size:10px;font-weight:600;letter-spacing:0.15em;text-transform:uppercase;color:var(--red);position:relative;z-index:1}
+.frente-tag::before{content:'';width:20px;height:1px;background:var(--red)}
+
+.frente-visual{position:relative;overflow:hidden}
+.frente-visual-s{background:var(--off-white)}
+.frente-visual-e1{background:var(--black)}
+.frente-visual-e2{background:var(--red)}
+.visual-shape{position:absolute}
+/* S visual */
+.vs-circle{width:300px;height:300px;border:1px solid rgba(210,35,42,0.2);border-radius:50%;top:50%;left:50%;transform:translate(-50%,-50%)}
+.vs-circle-2{width:200px;height:200px;border:1px solid rgba(210,35,42,0.4);border-radius:50%;top:50%;left:50%;transform:translate(-50%,-50%)}
+.vs-box{width:80px;height:80px;background:var(--red);border-radius:0 0 0 20px;bottom:4rem;right:4rem}
+/* E1 visual */
+.ve1-line{width:1px;height:60%;background:rgba(255,255,255,0.1);top:20%;left:50%;transform:translateX(-50%)}
+.ve1-dot{width:8px;height:8px;background:var(--red);border-radius:50%;top:50%;left:50%;transform:translate(-50%,-50%)}
+/* E2 visual */
+.ve2-text{font-family:var(--font-display);font-size:8rem;font-weight:300;color:rgba(255,255,255,0.08);top:50%;left:50%;transform:translate(-50%,-50%);white-space:nowrap;font-style:italic}
+
+/* ── 05 VIDEO ── */
+#video-section{background:var(--black);flex-direction:column;padding:5rem}
+.video-header{text-align:center;margin-bottom:4rem;position:relative;z-index:2}
+.video-header .section-label{justify-content:center;color:var(--gray-mid)}
+.video-header .section-label::after{background:var(--gray-mid)}
+.video-title{font-family:var(--font-display);font-size:clamp(2rem,3.5vw,3.5rem);font-weight:300;color:var(--white);line-height:1.2}
+.video-title em{font-style:italic;color:var(--red)}
+.devices-wrapper{display:flex;align-items:flex-end;justify-content:center;gap:3rem;position:relative;z-index:2}
+
+/* Desktop mockup */
+.desktop-mock{width:520px;flex-shrink:0}
+.desktop-screen{background:#0d0d0d;border-radius:12px 12px 0 0;padding:8px;border:2px solid #2a2a2a;position:relative}
+.desktop-bar{display:flex;align-items:center;gap:6px;padding:8px 12px;background:#1a1a1a;border-radius:8px 8px 0 0;margin:-8px -8px 8px -8px}
+.desktop-dot{width:8px;height:8px;border-radius:50%}
+.desktop-content{background:#111;border-radius:4px;overflow:hidden;aspect-ratio:16/10;display:flex;align-items:center;justify-content:center;position:relative;cursor:pointer}
+.desktop-stand{width:80px;height:16px;background:#1a1a1a;margin:0 auto;border-radius:0 0 4px 4px}
+.desktop-base{width:140px;height:8px;background:#1a1a1a;margin:0 auto;border-radius:4px}
+
+/* Mobile mockup */
+.mobile-mock{width:160px;flex-shrink:0;margin-bottom:2rem}
+.mobile-screen{background:#0d0d0d;border-radius:28px;padding:10px;border:2px solid #2a2a2a;position:relative}
+.mobile-notch{width:60px;height:18px;background:#0d0d0d;border-radius:0 0 12px 12px;margin:0 auto -4px;position:relative;z-index:2}
+.mobile-content{background:#111;border-radius:20px;overflow:hidden;aspect-ratio:9/19;display:flex;align-items:center;justify-content:center;position:relative;cursor:pointer}
+.mobile-home{width:40px;height:4px;background:#2a2a2a;border-radius:2px;margin:8px auto 0}
+
+/* Placeholder screen content */
+.placeholder-screen{width:100%;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;background:linear-gradient(135deg,#111 0%,#1a0a0a 50%,#111 100%);position:relative;overflow:hidden}
+.placeholder-screen::before{content:'';position:absolute;inset:0;background:radial-gradient(circle at 30% 50%,rgba(210,35,42,0.08) 0%,transparent 60%)}
+.play-btn{width:48px;height:48px;border:1.5px solid rgba(210,35,42,0.6);border-radius:50%;display:flex;align-items:center;justify-content:center;margin-bottom:12px;position:relative;z-index:1}
+.play-btn::after{content:'';width:0;height:0;border-style:solid;border-width:8px 0 8px 14px;border-color:transparent transparent transparent var(--red);margin-left:3px}
+.placeholder-label{font-size:8px;font-weight:600;letter-spacing:0.2em;text-transform:uppercase;color:rgba(255,255,255,0.3);position:relative;z-index:1;text-align:center}
+.placeholder-sub{font-size:7px;font-weight:400;letter-spacing:0.1em;color:rgba(210,35,42,0.5);margin-top:4px;position:relative;z-index:1;text-align:center}
+
+/* Mobile smaller play */
+.play-btn-sm{width:32px;height:32px;border-width:1px}
+.play-btn-sm::after{border-width:5px 0 5px 9px;margin-left:2px}
+
+.video-note{text-align:center;margin-top:3rem;font-size:11px;font-weight:300;color:rgba(255,255,255,0.3);letter-spacing:0.05em;position:relative;z-index:2}
+.video-note strong{color:rgba(210,35,42,0.7);font-weight:500}
+
+/* ── 06 ROADMAP ── */
+#roadmap{background:var(--off-white);flex-direction:column;padding:6rem;align-items:flex-start}
+.roadmap-title{font-family:var(--font-display);font-size:clamp(2.2rem,4vw,4rem);font-weight:300;color:var(--black);line-height:1.1;margin-bottom:4rem;max-width:600px}
+.roadmap-title em{font-style:italic;color:var(--red)}
+.roadmap-track{width:100%;position:relative}
+.roadmap-line{position:absolute;top:28px;left:28px;right:0;height:1px;background:var(--gray-light)}
+.roadmap-line-progress{position:absolute;top:28px;left:28px;width:0;height:1px;background:var(--red);transition:width 1.5s ease}
+.roadmap-line-progress.visible{width:calc(100% - 28px)}
+.roadmap-stops{display:grid;grid-template-columns:repeat(3,1fr);gap:2rem;position:relative;z-index:1}
+.roadmap-stop{opacity:0;transform:translateY(20px);transition:opacity 0.5s ease,transform 0.5s ease}
+.roadmap-stop.visible{opacity:1;transform:translateY(0)}
+.stop-dot{width:56px;height:56px;border-radius:50%;border:1px solid var(--gray-light);background:var(--white);display:flex;align-items:center;justify-content:center;margin-bottom:1.5rem;position:relative}
+.stop-dot-inner{width:10px;height:10px;border-radius:50%;background:var(--gray-mid)}
+.roadmap-stop.active .stop-dot{border-color:var(--red);background:var(--red)}
+.roadmap-stop.active .stop-dot-inner{background:var(--white)}
+.stop-period{font-size:9px;font-weight:600;letter-spacing:0.2em;text-transform:uppercase;color:var(--red);margin-bottom:0.75rem}
+.stop-title{font-family:var(--font-display);font-size:1.4rem;font-weight:400;color:var(--black);margin-bottom:0.75rem;line-height:1.2}
+.stop-items{list-style:none}
+.stop-items li{font-size:12px;font-weight:300;color:var(--gray-dark);line-height:1.8;padding-left:12px;position:relative}
+.stop-items li::before{content:'—';position:absolute;left:0;color:var(--red);font-size:10px}
+
+/* ── 07 ENCERRAMENTO ── */
+#encerramento{background:var(--black);flex-direction:column;justify-content:center;align-items:flex-start;padding:6rem;position:relative;overflow:hidden}
+.enc-bg{position:absolute;bottom:0;right:0;width:50%;height:60%;background:var(--red);clip-path:polygon(40% 0,100% 0,100% 100%,0 100%);opacity:0.08}
+.enc-bg-box{position:absolute;bottom:3rem;right:3rem;width:120px;height:120px;background:var(--red);border-radius:0 0 0 32px;opacity:0.6}
+.enc-label{font-size:9px;font-weight:600;letter-spacing:0.3em;text-transform:uppercase;color:rgba(255,255,255,0.3);margin-bottom:3rem;display:flex;align-items:center;gap:12px}
+.enc-label::after{content:'';display:block;width:40px;height:1px;background:rgba(255,255,255,0.2)}
+.enc-title{font-family:var(--font-display);font-size:clamp(2.5rem,5vw,5rem);font-weight:300;color:var(--white);line-height:1.05;margin-bottom:2rem;max-width:700px}
+.enc-title em{font-style:italic;color:var(--red)}
+.enc-sub{font-size:14px;font-weight:300;color:rgba(255,255,255,0.5);line-height:1.9;max-width:480px;margin-bottom:3rem}
+.enc-sub strong{color:rgba(255,255,255,0.85);font-weight:400}
+.enc-ask{display:inline-flex;align-items:center;gap:12px;font-size:11px;font-weight:500;letter-spacing:0.15em;text-transform:uppercase;color:var(--white);border-bottom:1px solid rgba(210,35,42,0.5);padding-bottom:8px}
+.enc-ask::after{content:'→';color:var(--red)}
+.enc-logo{position:absolute;bottom:3rem;left:6rem;opacity:0.12}
+.enc-logo-text{font-family:var(--font-display);font-size:3rem;font-weight:300;color:var(--white);letter-spacing:0.05em}
+
+/* ── NAV ── */
+.nav-progress{position:fixed;left:2rem;top:50%;transform:translateY(-50%);display:flex;flex-direction:column;gap:12px;z-index:100}
+.nav-pip{width:4px;height:4px;border-radius:50%;background:rgba(0,0,0,0.2);cursor:pointer;transition:all 0.3s ease;position:relative}
+.nav-pip::after{content:attr(data-label);position:absolute;left:16px;top:50%;transform:translateY(-50%);font-size:9px;font-weight:600;letter-spacing:0.15em;text-transform:uppercase;color:var(--gray-dark);white-space:nowrap;opacity:0;transition:opacity 0.2s}
+.nav-pip:hover::after{opacity:1}
+.nav-pip.active{background:var(--red);width:4px;height:20px;border-radius:2px}
+.dark-section .nav-pip{background:rgba(255,255,255,0.2)}
+.dark-section .nav-pip.active{background:var(--red)}
+
+/* scroll hint */
+.scroll-hint{position:absolute;bottom:2.5rem;left:50%;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:8px;opacity:0.4}
+.scroll-hint span{font-size:9px;font-weight:500;letter-spacing:0.2em;text-transform:uppercase;color:currentColor}
+.scroll-arrow{width:1px;height:32px;background:currentColor;position:relative;animation:scrollDown 1.5s ease infinite}
+.scroll-arrow::after{content:'';position:absolute;bottom:0;left:50%;transform:translateX(-50%);width:0;height:0;border-left:3px solid transparent;border-right:3px solid transparent;border-top:5px solid currentColor}
+@keyframes scrollDown{0%{opacity:0;transform:scaleY(0);transform-origin:top}50%{opacity:1}100%{opacity:0;transform:scaleY(1);transform-origin:top}}
+
+/* Animations */
+.fade-up{opacity:0;transform:translateY(40px);transition:opacity 0.8s ease,transform 0.8s ease}
+.fade-up.visible{opacity:1;transform:translateY(0)}
+.fade-up-d1{transition-delay:0.1s}
+.fade-up-d2{transition-delay:0.2s}
+.fade-up-d3{transition-delay:0.3s}
+.fade-up-d4{transition-delay:0.4s}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav class="nav-progress" id="mainNav">
+  <div class="nav-pip active" data-label="Início" data-target="hero" onclick="scrollTo('hero')"></div>
+  <div class="nav-pip" data-label="Diagnóstico" data-target="dores" onclick="scrollTo('dores')"></div>
+  <div class="nav-pip" data-label="O Plano" data-target="circulo" onclick="scrollTo('circulo')"></div>
+  <div class="nav-pip" data-label="SEE THE FUTURE" data-target="see" onclick="scrollTo('see')"></div>
+  <div class="nav-pip" data-label="Demonstração" data-target="video-section" onclick="scrollTo('video-section')"></div>
+  <div class="nav-pip" data-label="Roadmap" data-target="roadmap" onclick="scrollTo('roadmap')"></div>
+  <div class="nav-pip" data-label="Próximo Passo" data-target="encerramento" onclick="scrollTo('encerramento')"></div>
+</nav>
+
+<!-- 01 HERO -->
+<section id="hero">
+  <div class="hero-inner">
+    <!-- Brand background elements — subtle, from manual -->
+    <div class="hero-gray-band"></div>
+    <div class="hero-bg-box-lg"></div>
+    <div class="hero-bg-box-sm"></div>
+
+    <!-- SO animated canvas — right side -->
+    <div class="so-canvas" id="soCanvas">
+      <svg viewBox="0 0 520 420" fill="none" xmlns="http://www.w3.org/2000/svg">
+
+        <!-- ── O — visão sistêmica, centro 270,300 ── -->
+        <circle cx="270" cy="300" r="118" stroke="rgba(118,119,123,0.08)" stroke-width="1" fill="none"/>
+        <circle id="oCircle" cx="270" cy="300" r="88"
+          stroke="rgba(118,119,123,0.45)" stroke-width="1.5" fill="none"
+          stroke-dasharray="553" stroke-dashoffset="553"/>
+        <circle id="oInner" cx="270" cy="300" r="54"
+          stroke="rgba(210,35,42,0.25)" stroke-width="1" fill="none"
+          stroke-dasharray="339" stroke-dashoffset="339"/>
+        <circle id="oCore" cx="270" cy="300" r="16"
+          fill="rgba(210,35,42,0.12)" stroke="var(--red)" stroke-width="1.2" opacity="0"/>
+        <circle id="oCoreDot" cx="270" cy="300" r="5" fill="var(--red)" opacity="0"/>
+
+        <!-- nós periféricos -->
+        <circle id="on0" cx="270" cy="212" r="6" fill="rgba(210,35,42,0)" stroke="rgba(118,119,123,0.5)" stroke-width="1" opacity="0"/>
+        <circle id="on1" cx="346" cy="256" r="6" fill="rgba(210,35,42,0)" stroke="rgba(118,119,123,0.5)" stroke-width="1" opacity="0"/>
+        <circle id="on2" cx="346" cy="344" r="6" fill="rgba(210,35,42,0)" stroke="rgba(118,119,123,0.5)" stroke-width="1" opacity="0"/>
+        <circle id="on3" cx="270" cy="388" r="6" fill="rgba(210,35,42,0)" stroke="rgba(118,119,123,0.5)" stroke-width="1" opacity="0"/>
+        <circle id="on4" cx="194" cy="344" r="6" fill="rgba(210,35,42,0)" stroke="rgba(118,119,123,0.5)" stroke-width="1" opacity="0"/>
+        <circle id="on5" cx="194" cy="256" r="6" fill="rgba(210,35,42,0)" stroke="rgba(118,119,123,0.5)" stroke-width="1" opacity="0"/>
+
+        <!-- linhas nós → núcleo -->
+        <line id="ol0" x1="270" y1="212" x2="270" y2="284" stroke="rgba(210,35,42,0.2)" stroke-width="0.8" opacity="0"/>
+        <line id="ol1" x1="346" y1="256" x2="284" y2="284" stroke="rgba(210,35,42,0.2)" stroke-width="0.8" opacity="0"/>
+        <line id="ol2" x1="346" y1="344" x2="284" y2="316" stroke="rgba(210,35,42,0.2)" stroke-width="0.8" opacity="0"/>
+        <line id="ol3" x1="270" y1="388" x2="270" y2="316" stroke="rgba(210,35,42,0.2)" stroke-width="0.8" opacity="0"/>
+        <line id="ol4" x1="194" y1="344" x2="256" y2="316" stroke="rgba(210,35,42,0.2)" stroke-width="0.8" opacity="0"/>
+        <line id="ol5" x1="194" y1="256" x2="256" y2="284" stroke="rgba(210,35,42,0.2)" stroke-width="0.8" opacity="0"/>
+
+        <!-- ── S deitado, posicionado acima e à esquerda do O ── -->
+        <!-- Trilha fantasma -->
+        <path transform="translate(270,95) rotate(-90) translate(-91,0)"
+          d="M97 0 C97 0 7 -3 1 45 C-5 93 89 97 83 141 C77 179 7 183 7 183"
+          stroke="rgba(118,119,123,0.15)" stroke-width="9" stroke-linecap="round" fill="none" stroke-dasharray="6 8"/>
+
+        <!-- Ponto de origem -->
+        <circle transform="translate(270,95) rotate(-90) translate(-91,0)" cx="97" cy="0" r="7" fill="rgba(210,35,42,0.15)" stroke="var(--red)" stroke-width="1.2"/>
+        <circle transform="translate(270,95) rotate(-90) translate(-91,0)" cx="97" cy="0" r="3" fill="var(--red)"/>
+
+        <!-- S principal animado -->
+        <path id="sPath" transform="translate(270,95) rotate(-90) translate(-91,0)"
+          d="M97 0 C97 0 7 -3 1 45 C-5 93 89 97 83 141 C77 179 7 183 7 183"
+          stroke="var(--red)" stroke-width="7" stroke-linecap="round" stroke-linejoin="round" fill="none"
+          stroke-dasharray="680" stroke-dashoffset="680"/>
+
+        <!-- Ponto final -->
+        <circle id="destPin" transform="translate(270,95) rotate(-90) translate(-91,0)" cx="7" cy="183" r="4" fill="var(--red)" opacity="0"/>
+
+      </svg>
+    </div>
+
+    <!-- Main content — left aligned, full width -->
+    <div class="hero-content">
+      <svg class="hero-logo fade-up" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 44" style="height:32px;width:auto;display:block;margin-bottom:2.5rem;overflow:visible">
+  <text y="34" font-family="'Cormorant Garamond',Georgia,serif" font-size="38" font-weight="400" letter-spacing="2" fill="#B1B1B1">SOUZA</text>
+  <text x="155" y="34" font-family="'Cormorant Garamond',Georgia,serif" font-size="38" font-weight="400" font-style="italic" fill="#D2232A">O</text>
+  <text x="178" y="34" font-family="'Cormorant Garamond',Georgia,serif" font-size="38" font-weight="400" letter-spacing="2" fill="#B1B1B1">KAWA</text>
+</svg>
+      <h1 class="hero-title fade-up fade-up-d1">Projeto<br><em>Waze</em></h1>
+      <p class="hero-recalc fade-up fade-up-d2">Recalculando a rota.</p>
+      <div class="hero-divider fade-up fade-up-d2"></div>
+      <p class="hero-sub fade-up fade-up-d3">Uma proposta para criar valor além do modelo tradicional — integrando inovação, legalops e legal design como alavancas de crescimento.</p>
+      <span class="hero-tag fade-up fade-up-d4">Área de Inovação</span>
+    </div>
+
+    <!-- Bottom-left brand accent line -->
+    <div style="position:absolute;bottom:0;left:0;width:3px;height:80px;background:var(--red);opacity:0.8"></div>
+  </div>
+  <div class="scroll-hint" style="color:rgba(255,255,255,0.25)">
+    <span>scroll</span>
+    <div class="scroll-arrow"></div>
+  </div>
+</section>
+
+<!-- 02 DORES -->
+<section id="dores">
+  <p class="section-label">Diagnóstico interno</p>
+  <h2 class="dores-title fade-up">O que observo<br>todos os dias <em>—<br>e que podemos mudar.</em></h2>
+  <div class="dores-grid">
+    <div class="dor-card">
+      <span class="dor-num">01</span>
+      <p class="dor-title">Esforço desperdiçado</p>
+      <p class="dor-desc">Trabalhos repetidos e repetitivos que consomem hora de advogado sênior sem agregar valor intelectual real.</p>
+      <p class="dor-quote">"Reconstruímos o que já foi feito porque não sabemos onde encontrar."</p>
+    </div>
+    <div class="dor-card">
+      <span class="dor-num">02</span>
+      <p class="dor-title">Comunicação fragmentada</p>
+      <p class="dor-desc">Falhas no fluxo interno que geram retrabalho, ruído e perda de eficiência em demandas que deveriam ser simples.</p>
+      <p class="dor-quote">"A informação existe — ela só não chega para quem precisa, na hora certa."</p>
+    </div>
+    <div class="dor-card">
+      <span class="dor-num">03</span>
+      <p class="dor-title">Entrega abaixo do potencial</p>
+      <p class="dor-desc">A qualidade técnica do nosso trabalho não se reflete na forma como ele é apresentado. Não por falta de capacidade — por falta de estrutura.</p>
+      <p class="dor-quote">"O trabalho é excelente. A embalagem ainda não conta essa história."</p>
+    </div>
+  </div>
+</section>
+
+<!-- 03 CIRCULO -->
+<section id="circulo" class="dark-section">
+  <div class="circulo-header fade-up">
+    <p class="section-label">A proposta</p>
+    <h2 class="circulo-title">Uma área que <em>integra,<br>não que separa.</em></h2>
+  </div>
+  <div class="orbit-container">
+    <div class="orbit-ring"></div>
+    <div class="orbit-inner" id="orbitInner"></div>
+    <div class="inovacao-ring" id="inovacaoRing"></div>
+    <div class="orbit-center" id="orbitCenter">
+      <span class="orbit-center-text">ÁREA DE<br>INOVAÇÃO</span>
+    </div>
+    <!-- Area nodes positioned around circle -->
+    <div class="area-node" id="node0" style="top:10px;left:50%;transform:translateX(-50%) scale(0.5)">
+      <div class="area-dot">TRI</div>
+      <div class="area-label">Tributário</div>
+    </div>
+    <div class="area-node" id="node1" style="top:80px;right:20px;transform:scale(0.5)">
+      <div class="area-dot">SOC</div>
+      <div class="area-label">Societário<br>M&A</div>
+    </div>
+    <div class="area-node" id="node2" style="bottom:80px;right:20px;transform:scale(0.5)">
+      <div class="area-dot">CON</div>
+      <div class="area-label">Contencioso</div>
+    </div>
+    <div class="area-node" id="node3" style="bottom:10px;left:50%;transform:translateX(-50%) scale(0.5)">
+      <div class="area-dot">PAT</div>
+      <div class="area-label">Patrimonial<br>Sucessório</div>
+    </div>
+    <div class="area-node" id="node4" style="bottom:80px;left:20px;transform:scale(0.5)">
+      <div class="area-dot">INF</div>
+      <div class="area-label">Infra&shy;estrutura</div>
+    </div>
+    <div class="area-node" id="node5" style="top:80px;left:20px;transform:scale(0.5)">
+      <div class="area-dot">MCA</div>
+      <div class="area-label">Mercado de<br>Capitais</div>
+    </div>
+  </div>
+  <p class="fade-up" style="font-size:12px;font-weight:300;color:rgba(255,255,255,0.4);letter-spacing:0.08em;text-align:center;margin-top:2rem">A inovação não compete com as áreas. Ela amplifica o que cada uma já faz.</p>
+</section>
+
+<!-- 04 SEE THE FUTURE -->
+<section id="see" style="padding:0;display:block;min-height:auto">
+  <div class="see-wrapper">
+    <!-- SEE THE FUTURE reveal -->
+    <div class="see-intro">
+      <div class="see-word" id="seeWord">
+        <span>S</span>EE THE <span>F</span>UTURE
+      </div>
+      <p class="see-subtitle" id="seeSub">Simplicidade · Empatia · Excelência</p>
+    </div>
+
+    <!-- S Block -->
+    <div class="frente-block" id="frenteS">
+      <div class="frente-content">
+        <div class="frente-letter">S</div>
+        <p class="frente-word">Simplicidade</p>
+        <h3 class="frente-name">Entregar melhor<br>o que já fazemos</h3>
+        <p class="frente-phrase">O essencial, entregue com clareza.<br><strong>Padronizar, automatizar e redesenhar</strong> a forma como o trabalho chega ao cliente — sem abrir mão do rigor técnico que nos define.</p>
+        <span class="frente-tag">Legalops & Experiência do Cliente</span>
+      </div>
+      <div class="frente-visual frente-visual-s">
+        <div class="visual-shape vs-circle"></div>
+        <div class="visual-shape vs-circle-2"></div>
+        <div class="visual-shape vs-box"></div>
+      </div>
+    </div>
+
+    <!-- E1 Block -->
+    <div class="frente-block" id="frenteE1">
+      <div class="frente-content" style="background:var(--black)">
+        <div class="frente-letter" style="color:rgba(255,255,255,0.06)">E</div>
+        <p class="frente-word">Empatia</p>
+        <h3 class="frente-name" style="color:var(--white)">Trabalhar diferente<br>por dentro</h3>
+        <p class="frente-phrase" style="color:rgba(255,255,255,0.5)">O olhar humano que muda o fluxo.<br><strong style="color:rgba(255,255,255,0.85)">Redesenhar como os advogados trabalham</strong> — com ferramentas melhores, menos atrito, mais capacidade para o que realmente importa.</p>
+        <span class="frente-tag">Experiência do Advogado & Fluxo Interno</span>
+      </div>
+      <div class="frente-visual frente-visual-e1">
+        <div class="visual-shape ve1-line"></div>
+        <div class="visual-shape ve1-dot"></div>
+        <div style="position:absolute;bottom:3rem;right:3rem;width:60px;height:60px;background:var(--red);border-radius:0 0 0 16px;opacity:0.7"></div>
+      </div>
+    </div>
+
+    <!-- E2 Block -->
+    <div class="frente-block" id="frenteE2">
+      <div class="frente-content">
+        <div class="frente-letter">E</div>
+        <p class="frente-word">Excelência</p>
+        <h3 class="frente-name">Criar o que ainda<br>não existe aqui</h3>
+        <p class="frente-phrase">Novos produtos. Nova receita. Novo patamar.<br><strong>Transformar o conhecimento acumulado</strong> em produtos escaláveis que geram valor além da hora trabalhada.</p>
+        <span class="frente-tag">Novos Produtos & Linhas de Receita</span>
+      </div>
+      <div class="frente-visual frente-visual-e2">
+        <div class="visual-shape ve2-text">∞</div>
+        <div style="position:absolute;top:3rem;left:3rem;width:60px;height:60px;background:rgba(255,255,255,0.1);border-radius:0 0 0 16px"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 05 VIDEO -->
+<section id="video-section" class="dark-section">
+  <div class="video-header fade-up">
+    <p class="section-label">Demonstração</p>
+    <h2 class="video-title">O futuro que estamos<br><em>construindo agora.</em></h2>
+  </div>
+  <div class="devices-wrapper fade-up fade-up-d2">
+    <!-- Desktop -->
+    <div class="desktop-mock">
+      <div class="desktop-screen">
+        <div class="desktop-bar">
+          <div class="desktop-dot" style="background:#ff5f57"></div>
+          <div class="desktop-dot" style="background:#ffbd2e"></div>
+          <div class="desktop-dot" style="background:#28c840"></div>
+          <div style="flex:1;background:#2a2a2a;border-radius:4px;height:16px;margin-left:8px;display:flex;align-items:center;padding:0 8px">
+            <span style="font-size:8px;color:#555;letter-spacing:0.05em">souzaokawa.inovacao.com.br</span>
+          </div>
+        </div>
+        <div class="desktop-content">
+          <div class="placeholder-screen">
+            <div class="play-btn"></div>
+            <p class="placeholder-label">Inserir vídeo</p>
+            <p class="placeholder-sub">Demonstração — plataforma desktop</p>
+          </div>
+        </div>
+      </div>
+      <div class="desktop-stand"></div>
+      <div class="desktop-base"></div>
+    </div>
+    <!-- Mobile -->
+    <div class="mobile-mock">
+      <div class="mobile-screen">
+        <div class="mobile-notch"></div>
+        <div class="mobile-content">
+          <div class="placeholder-screen">
+            <div class="play-btn play-btn-sm"></div>
+            <p class="placeholder-label" style="font-size:6px">Inserir vídeo</p>
+            <p class="placeholder-sub" style="font-size:5px">Versão mobile</p>
+          </div>
+        </div>
+        <div class="mobile-home"></div>
+      </div>
+    </div>
+  </div>
+  <p class="video-note fade-up fade-up-d3">Substitua os placeholders pelo vídeo de demonstração. <strong>Formato recomendado: MP4, proporção 16:9 (desktop) e 9:19 (mobile)</strong></p>
+</section>
+
+<!-- 06 ROADMAP -->
+<section id="roadmap">
+  <p class="section-label fade-up">Os primeiros passos</p>
+  <h2 class="roadmap-title fade-up fade-up-d1">180 dias para<br><em>provar o conceito.</em></h2>
+  <div class="roadmap-track">
+    <div class="roadmap-line"></div>
+    <div class="roadmap-line-progress" id="roadmapProgress"></div>
+    <div class="roadmap-stops">
+      <div class="roadmap-stop active" id="stop0">
+        <div class="stop-dot"><div class="stop-dot-inner"></div></div>
+        <p class="stop-period">0 — 60 dias</p>
+        <h4 class="stop-title">Templates & Conhecimento</h4>
+        <ul class="stop-items">
+          <li>Legal design nas entregas mais recorrentes</li>
+          <li>Repositório de conhecimento interno com busca semântica</li>
+          <li>Política de uso de IA aprovada</li>
+        </ul>
+      </div>
+      <div class="roadmap-stop" id="stop1">
+        <div class="stop-dot"><div class="stop-dot-inner"></div></div>
+        <p class="stop-period">60 — 120 dias</p>
+        <h4 class="stop-title">Primeiro Produto</h4>
+        <ul class="stop-items">
+          <li>Diagnóstico jurídico-empresarial com 2 clientes piloto</li>
+          <li>Automação de documentos recorrentes</li>
+          <li>Onboarding digital de clientes</li>
+        </ul>
+      </div>
+      <div class="roadmap-stop" id="stop2">
+        <div class="stop-dot"><div class="stop-dot-inner"></div></div>
+        <p class="stop-period">120 — 180 dias</p>
+        <h4 class="stop-title">Prova de Conceito</h4>
+        <ul class="stop-items">
+          <li>Primeira revisão de resultados com os sócios</li>
+          <li>Início do produto de inteligência regulatória</li>
+          <li>Portal de acompanhamento do cliente em desenvolvimento</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 07 ENCERRAMENTO -->
+<section id="encerramento" class="dark-section">
+  <div class="enc-bg"></div>
+  <div class="enc-bg-box"></div>
+  <p class="enc-label fade-up">O próximo passo</p>
+  <h2 class="enc-title fade-up fade-up-d1">A rota já está<br>traçada.<br><em>Quando partimos?</em></h2>
+  <p class="enc-sub fade-up fade-up-d2">O escritório já tem o conhecimento, os clientes e a reputação. <strong>O que proponho é a estrutura que transforma esses ativos em resultado.</strong> Com critérios claros de sucesso nos primeiros 180 dias.</p>
+  <span class="enc-ask fade-up fade-up-d3">Aprovação para iniciar o Projeto Waze</span>
+  <div class="enc-logo">
+    <p class="enc-logo-text">SouzaOkawa</p>
+  </div>
+</section>
+
+<script>
+function scrollTo(id){document.getElementById(id).scrollIntoView({behavior:'smooth'})}
+
+// S path + O animation on load
+window.addEventListener('load',function(){
+  setTimeout(function(){
+
+    // ── S: traçado da rota ──
+    var sPath = document.getElementById('sPath');
+    if(sPath){
+      sPath.style.transition = 'stroke-dashoffset 2.2s cubic-bezier(0.4,0,0.2,1)';
+      sPath.style.strokeDashoffset = '0';
+    }
+
+    // Ponto final aparece ao término do traçado
+    setTimeout(function(){
+      var destPin = document.getElementById('destPin');
+      if(destPin){ destPin.style.transition = 'opacity 0.4s ease'; destPin.style.opacity = '1'; }
+    }, 2400);
+
+    // ── O: visão sistêmica — começa junto com o fim do S ──
+    setTimeout(function(){
+
+      // Anel médio (O principal)
+      var oCircle = document.getElementById('oCircle');
+      if(oCircle){
+        oCircle.style.transition = 'stroke-dashoffset 1.6s ease';
+        oCircle.style.strokeDashoffset = '0';
+      }
+
+      // Anel interno
+      setTimeout(function(){
+        var oInner = document.getElementById('oInner');
+        if(oInner){
+          oInner.style.transition = 'stroke-dashoffset 1.2s ease';
+          oInner.style.strokeDashoffset = '0';
+        }
+      }, 600);
+
+      // Núcleo central
+      setTimeout(function(){
+        var oCore = document.getElementById('oCore');
+        var oCoreDot = document.getElementById('oCoreDot');
+        if(oCore){ oCore.style.transition = 'opacity 0.5s ease'; oCore.style.opacity = '1'; }
+        if(oCoreDot){ oCoreDot.style.transition = 'opacity 0.5s ease'; oCoreDot.style.opacity = '1'; }
+      }, 1200);
+
+      // Nós periféricos + linhas — aparecem em sequência
+      var nodeIds  = ['on0','on1','on2','on3','on4','on5'];
+      var lineIds  = ['ol0','ol1','ol2','ol3','ol4','ol5'];
+      nodeIds.forEach(function(id, i){
+        setTimeout(function(){
+          var node = document.getElementById(id);
+          var line = document.getElementById(lineIds[i]);
+          if(node){
+            node.style.transition = 'opacity 0.4s ease, r 0.4s ease';
+            node.style.opacity = '1';
+            node.setAttribute('fill','rgba(210,35,42,0.15)');
+            node.setAttribute('stroke','var(--red)');
+          }
+          if(line){ line.style.transition = 'opacity 0.4s ease'; line.style.opacity = '1'; }
+        }, 1400 + i * 180);
+      });
+
+
+
+    }, 1200); // O começa enquanto S ainda está terminando
+
+  }, 500);
+
+  // fade-up on load for hero
+  document.querySelectorAll('#hero .fade-up').forEach(function(el,i){
+    setTimeout(function(){el.classList.add('visible')},300+i*150);
+  });
+});
+
+// Intersection Observer
+var observer=new IntersectionObserver(function(entries){
+  entries.forEach(function(entry){
+    if(entry.isIntersecting){
+      var el=entry.target;
+      el.classList.add('visible');
+      // Special handlers
+      if(el.id==='seeWord'||el.id==='seeSub'){el.classList.add('visible')}
+      observer.unobserve(el);
+    }
+  });
+},{threshold:0.2});
+
+document.querySelectorAll('.fade-up,.dor-card,.frente-block,.roadmap-stop').forEach(function(el){
+  observer.observe(el);
+});
+
+// Orbit animation
+var orbitObserver=new IntersectionObserver(function(entries){
+  entries.forEach(function(entry){
+    if(entry.isIntersecting){
+      animateOrbit();
+      orbitObserver.unobserve(entry.target);
+    }
+  });
+},{threshold:0.3});
+var orbitEl=document.querySelector('.orbit-container');
+if(orbitEl)orbitObserver.observe(orbitEl);
+
+function animateOrbit(){
+  var nodes=document.querySelectorAll('.area-node');
+  document.getElementById('orbitInner').classList.add('visible');
+  nodes.forEach(function(node,i){
+    setTimeout(function(){
+      node.style.transition='opacity 0.5s ease,transform 0.5s ease';
+      node.classList.add('visible');
+    },i*300);
+  });
+  setTimeout(function(){
+    document.getElementById('inovacaoRing').classList.add('visible');
+    document.getElementById('orbitCenter').classList.add('visible');
+  },nodes.length*300+200);
+}
+
+// SEE THE FUTURE observer
+var seeObserver=new IntersectionObserver(function(entries){
+  entries.forEach(function(entry){
+    if(entry.isIntersecting){
+      document.getElementById('seeWord').classList.add('visible');
+      document.getElementById('seeSub').classList.add('visible');
+      seeObserver.unobserve(entry.target);
+    }
+  });
+},{threshold:0.4});
+var seeIntro=document.querySelector('.see-intro');
+if(seeIntro)seeObserver.observe(seeIntro);
+
+// Roadmap progress
+var roadmapObs=new IntersectionObserver(function(entries){
+  entries.forEach(function(entry){
+    if(entry.isIntersecting){
+      document.getElementById('roadmapProgress').classList.add('visible');
+      var stops=document.querySelectorAll('.roadmap-stop');
+      stops.forEach(function(s,i){
+        setTimeout(function(){s.classList.add('visible')},i*300);
+      });
+      roadmapObs.unobserve(entry.target);
+    }
+  });
+},{threshold:0.2});
+var roadmapEl=document.querySelector('.roadmap-track');
+if(roadmapEl)roadmapObs.observe(roadmapEl);
+
+// Nav active state
+var sections=['hero','dores','circulo','see','video-section','roadmap','encerramento'];
+var scrollObs=new IntersectionObserver(function(entries){
+  entries.forEach(function(entry){
+    if(entry.isIntersecting){
+      var id=entry.target.id;
+      document.querySelectorAll('.nav-pip').forEach(function(pip){
+        pip.classList.toggle('active',pip.getAttribute('data-target')===id);
+      });
+    }
+  });
+},{threshold:0.4});
+sections.forEach(function(id){
+  var el=document.getElementById(id);
+  if(el)scrollObs.observe(el);
+});
+</script>
+</body>
+</html>
